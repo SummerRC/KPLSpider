@@ -1,0 +1,47 @@
+# version1.0: 构建的镜像>1G
+# 基于的基础镜像
+FROM python:3.7.8
+# 镜像是谁写的，姓名+邮箱
+MAINTAINER SummerRC "codamaker@gmail.com"
+# 将当前Dockerfile文件所在的路径下的代码添加到容器，并更名为app文件夹
+ADD . /app
+# 设置app文件夹是工作目录
+WORKDIR /app
+# 安装支持
+RUN pip install -r requirements.txt
+# 添加文件的执行权限
+RUN chmod +x /app/run.sh
+EXPOSE 6800 5000
+ENTRYPOINT ["/app/run.sh"]
+
+
+# version2.0:优化后的构建镜像只有200多M
+# 第一阶段
+# 基于的基础镜像，注意slim、Alphine、buster的区别
+FROM python:3.7.8-buster as builder-image
+# 从本地复制所有需要安装包到镜像中
+COPY requirements.txt .
+# pip安装python包，--no-cache-dir的作用是不缓存下载的包，-i 指定国内的镜像源。
+RUN pip3 install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 第二阶段
+# 选择小一点的基础镜像
+FROM python:3.7.8-slim
+# 把第一阶段的python安装的包都copy过来
+COPY --from=builder-image /usr/local/bin /usr/local/bin
+COPY --from=builder-image /usr/local/lib/python3.7/site-packages /usr/local/lib/python3.7/site-packages
+# 添加环境变量，否则scrapyd等命令不识别
+ENV PATH=/usr/local/bin:$PATH
+# 设置app文件夹是工作目录(会新建并cd到目录下)
+WORKDIR /app
+# 复制本地代码到当前目录下
+COPY . .
+# 1、创建logparser需要的目录，在运行logparser需要的目录时指定该目录
+# 2、添加文件的执行权限
+# 3、修改时区，否则时间不准
+RUN mkdir ./logs &&\
+    chmod +x /app/run.sh &&\
+    /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
+# 指定监控的端口
+EXPOSE 6800 5000
+ENTRYPOINT ["/app/run.sh"]
