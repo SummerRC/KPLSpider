@@ -64,6 +64,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    "kaipanla.pipelines.KaipanlaPipeline": 300,     # 300表示权重，权重越小越优先执行
+   "kaipanla.pipelines.KPLDaBanPipeline": 301,     # 300表示权重，权重越小越优先执行
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

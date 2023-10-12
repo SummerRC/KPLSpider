@@ -54,6 +54,16 @@ class StockUtils:
         n_time = datetime.datetime.now()
         return n_time < time_13
 
+    # 仅用于判定当前时间是15点之前还是之后
+    @staticmethod
+    def time_is_after_15_clock():
+        # A股交易时间范围
+        n_date = datetime.datetime.now().date()
+        time_13 = datetime.datetime.strptime(str(n_date) + '15:00', '%Y-%m-%d%H:%M')
+
+        # 当前时间
+        n_time = datetime.datetime.now()
+        return n_time >= time_13
 
 
 
