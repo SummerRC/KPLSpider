@@ -4,7 +4,7 @@ import logging
 import scrapy
 from scrapy import Selector
 
-from kaipanla.items.da_ban_item import DaBanItem
+from kaipanla.spider_items.da_ban_item import DaBanItem
 
 
 class KPLDaBanSpider(scrapy.Spider):
