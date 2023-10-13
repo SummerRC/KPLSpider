@@ -23,8 +23,7 @@ class DBUtils:
 
         conf = configparser.ConfigParser()
         conf.read('config.ini')
-        # config_db_name = 'PROD_DATABASE'
-        config_db_name = 'DEV_DATABASE'
+        config_db_name = conf.get("CHANGE_DB", "CONFIG_DB_NAME")
         db_address = conf.get(config_db_name, 'HOST')
         db_port = int(conf.get(config_db_name, 'PORT'))
         db_user = conf.get(config_db_name, 'USER')

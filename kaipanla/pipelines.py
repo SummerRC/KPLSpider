@@ -1,13 +1,9 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-import configparser
 import datetime
 import logging
-import pymysql
 
 from kaipanla.StockUtils import StockUtils
+from kaipanla.db.db_helper_daban import DaBanDbHelper
+from kaipanla.db.db_helper_zhqd import ZhqdDbHelper
 from kaipanla.spiders.kaipanla import KaiPanLaSpider
 from kaipanla.spiders.kpl_daban import KPLDaBanSpider
 
@@ -15,23 +11,6 @@ from kaipanla.spiders.kpl_daban import KPLDaBanSpider
 class KaipanlaPipeline:
 
     def __init__(self):
-
-        conf = configparser.ConfigParser()
-        conf.read('config.ini')
-        # config_db_name = 'PROD_DATABASE'
-        config_db_name = 'DEV_DATABASE'
-        db_address = conf.get(config_db_name, 'HOST')
-        db_port = int(conf.get(config_db_name, 'PORT'))
-        db_user = conf.get(config_db_name, 'USER')
-        db_password = conf.get(config_db_name, 'PASSWORD')
-        db_name = conf.get(config_db_name, 'DBNAME')
-        db_charset = conf.get(config_db_name, 'CHARSET')
-
-        self.conn = pymysql.connect(host=db_address, port=db_port,
-                                    user=db_user, password=db_password,
-                                    database=db_name, charset=db_charset)
-
-        self.cursor = self.conn.cursor()
         self.data = []
 
     # 爬虫开启的时候会执行一次
@@ -40,14 +19,7 @@ class KaipanlaPipeline:
 
     # 爬虫结束的时候会执行一次
     def close_spider(self, spider):
-        self.close_db()
-
-    # 关闭数据库
-    def close_db(self):
-        # 关闭游标
-        self.cursor.close()
-        # 关闭连接
-        self.conn.close()
+        pass
 
     # 每拿到一条数据都会执行一次
     def process_item(self, item, spider):
@@ -92,78 +64,13 @@ class KaipanlaPipeline:
         if int(item['zhqd']) == 0:
             return
 
-        self.insert_to_table_zhqd(item, spider)
-        self.insert_to_table_zhqd_unique(item, spider)
-
-    # 会重复插入
-    def insert_to_table_zhqd(self, item, spider):
-        try:
-            self.cursor.execute(
-                'insert into kaipanla_zhqd (zhqd, timestamp, is_trade_time, data_crawl_timestamp) '
-                'value (%s, %s, %s, %s)',
-                (item['zhqd'], item['timestamp'], item['is_trade_time'], item['data_crawl_timestamp'])
-            )
-            self.conn.commit()
-        except Exception as e:
-            spider.log("kaipanla_zhqd表数据插入失败, exception info: " + str(e), logging.ERROR)
-            # 失败后的回滚操作
-            self.conn.rollback()
-        else:  # 如果没有异常
-            spider.log("kaipanla_zhqd表数据插入成功", logging.DEBUG)
-        finally:
-            pass
-
-    # 不会重复插入 timestamp字段设置了唯一性，已存在的情况下会插入失败
-    def insert_to_table_zhqd_unique(self, item, spider):
-        try:
-            self.cursor.execute(
-                'insert into kaipanla_zhqd_unique (zhqd, timestamp, is_trade_time, data_crawl_timestamp) '
-                'value (%s, %s, %s, %s)',
-                (item['zhqd'], item['timestamp'], item['is_trade_time'], item['data_crawl_timestamp'])
-            )
-            self.conn.commit()
-        except Exception as e:
-            spider.log("kaipanla_zhqd_unique表数据插入失败, exception info: " + str(e), logging.ERROR)
-            # 失败后的回滚操作
-            self.conn.rollback()
-        else:  # 如果没有异常
-            spider.log("kaipanla_zhqd_unique表数据插入成功", logging.DEBUG)
-        finally:
-            pass
-
-    # 如果当天是休息日，该方法获取最近的交易日的日期的timestamp（要排除掉调休的周六周日）
-    def get_previous_workday_timestamp(self):
-        # 最近的一个工作日
-        previous_work_day = StockUtils.get_previous_work_day()
-        # 返回星期几（数字0 代表周一）
-        week_day = previous_work_day.weekday()
-        if week_day < 5:    # 小于5 代表是周一到周五的工作日
-            timestamp = datetime.datetime.strptime(str(previous_work_day) + ' 15:00:00', '%Y-%m-%d %H:%M:%S')
-            return timestamp
-        else:               # 周六周日，应该返回周六周日之前的最近一个周一到周五的工作日
-            return 0
+        db_helper = ZhqdDbHelper()
+        db_helper.insert_to_db(item, spider)
 
 
 class KPLDaBanPipeline:
 
     def __init__(self):
-
-        conf = configparser.ConfigParser()
-        conf.read('config.ini')
-        # config_db_name = 'PROD_DATABASE'
-        config_db_name = 'DEV_DATABASE'
-        db_address = conf.get(config_db_name, 'HOST')
-        db_port = int(conf.get(config_db_name, 'PORT'))
-        db_user = conf.get(config_db_name, 'USER')
-        db_password = conf.get(config_db_name, 'PASSWORD')
-        db_name = conf.get(config_db_name, 'DBNAME')
-        db_charset = conf.get(config_db_name, 'CHARSET')
-
-        self.conn = pymysql.connect(host=db_address, port=db_port,
-                                    user=db_user, password=db_password,
-                                    database=db_name, charset=db_charset)
-
-        self.cursor = self.conn.cursor()
         self.data = []
 
     # 爬虫开启的时候会执行一次
@@ -172,14 +79,7 @@ class KPLDaBanPipeline:
 
     # 爬虫结束的时候会执行一次
     def close_spider(self, spider):
-        self.close_db()
-
-    # 关闭数据库
-    def close_db(self):
-        # 关闭游标
-        self.cursor.close()
-        # 关闭连接
-        self.conn.close()
+        pass
 
     # 每拿到一条数据都会执行一次
     def process_item(self, item, spider):
@@ -203,53 +103,7 @@ class KPLDaBanPipeline:
         if int(item['zhqd']) == 0:
             return
 
-        self.insert_to_table_zhqd(item, spider)
-        self.insert_to_table_zhqd_unique(item, spider)
+        db_helper = DaBanDbHelper()
+        db_helper.insert_to_db(self, item, spider)
 
-    # 会重复插入
-    def insert_to_table_zhqd(self, item, spider):
-        try:
-            self.cursor.execute(
-                'insert into kaipanla_daban (zhqd, timestamp, is_trade_time, data_crawl_timestamp) '
-                'value (%s, %s, %s, %s)',
-                (item['zhqd'], item['timestamp'], item['is_trade_time'], item['data_crawl_timestamp'])
-            )
-            self.conn.commit()
-        except Exception as e:
-            spider.log("kaipanla_zhqd表数据插入失败, exception info: " + str(e), logging.ERROR)
-            # 失败后的回滚操作
-            self.conn.rollback()
-        else:  # 如果没有异常
-            spider.log("kaipanla_zhqd表数据插入成功", logging.DEBUG)
-        finally:
-            pass
 
-    # 不会重复插入 timestamp字段设置了唯一性，已存在的情况下会插入失败
-    def insert_to_table_zhqd_unique(self, item, spider):
-        try:
-            self.cursor.execute(
-                'insert into kaipanla_daban_unique (zhqd, timestamp, is_trade_time, data_crawl_timestamp) '
-                'value (%s, %s, %s, %s)',
-                (item['zhqd'], item['timestamp'], item['is_trade_time'], item['data_crawl_timestamp'])
-            )
-            self.conn.commit()
-        except Exception as e:
-            spider.log("kaipanla_zhqd_unique表数据插入失败, exception info: " + str(e), logging.ERROR)
-            # 失败后的回滚操作
-            self.conn.rollback()
-        else:  # 如果没有异常
-            spider.log("kaipanla_zhqd_unique表数据插入成功", logging.DEBUG)
-        finally:
-            pass
-
-    # 如果当天是休息日，该方法获取最近的交易日的日期的timestamp（要排除掉调休的周六周日）
-    def get_previous_workday_timestamp(self):
-        # 最近的一个工作日
-        previous_work_day = StockUtils.get_previous_work_day()
-        # 返回星期几（数字0 代表周一）
-        week_day = previous_work_day.weekday()
-        if week_day < 5:    # 小于5 代表是周一到周五的工作日
-            timestamp = datetime.datetime.strptime(str(previous_work_day) + ' 15:00:00', '%Y-%m-%d %H:%M:%S')
-            return timestamp
-        else:               # 周六周日，应该返回周六周日之前的最近一个周一到周五的工作日
-            return 0

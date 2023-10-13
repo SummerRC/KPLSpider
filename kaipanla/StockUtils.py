@@ -65,7 +65,17 @@ class StockUtils:
         n_time = datetime.datetime.now()
         return n_time >= time_13
 
-
+    # 如果当天是休息日，该方法获取最近的交易日的日期的timestamp（要排除掉调休的周六周日）
+    def get_previous_workday_timestamp(self):
+        # 最近的一个工作日
+        previous_work_day = StockUtils.get_previous_work_day()
+        # 返回星期几（数字0 代表周一）
+        week_day = previous_work_day.weekday()
+        if week_day < 5:    # 小于5 代表是周一到周五的工作日
+            timestamp = datetime.datetime.strptime(str(previous_work_day) + ' 15:00:00', '%Y-%m-%d %H:%M:%S')
+            return timestamp
+        else:               # 周六周日，应该返回周六周日之前的最近一个周一到周五的工作日
+            return 0
 
 
 
