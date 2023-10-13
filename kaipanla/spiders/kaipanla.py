@@ -1,11 +1,11 @@
 import datetime
 import logging
-import time
+
 import scrapy
 from scrapy import Selector
 
-from kaipanla.StockUtils import StockUtils
-from kaipanla.items import MotionItem
+from kaipanla.items.motion_item import MotionItem
+from kaipanla.utils.stock_utils import StockUtils
 
 
 class KaiPanLaSpider(scrapy.Spider):

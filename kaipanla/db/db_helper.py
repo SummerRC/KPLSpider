@@ -1,6 +1,6 @@
 import pymysql
 
-from kaipanla.config_helper import ConfigHelper
+from kaipanla.utils.config_helper import ConfigHelper
 
 
 class DbHelper:

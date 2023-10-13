@@ -1,11 +1,11 @@
 import datetime
 import logging
 
-from kaipanla.StockUtils import StockUtils
 from kaipanla.db.db_helper_daban import DaBanDbHelper
 from kaipanla.db.db_helper_zhqd import ZhqdDbHelper
 from kaipanla.spiders.kaipanla import KaiPanLaSpider
 from kaipanla.spiders.kpl_daban import KPLDaBanSpider
+from kaipanla.utils.stock_utils import StockUtils
 
 
 class KaipanlaPipeline:

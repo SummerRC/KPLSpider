@@ -1,11 +1,10 @@
 import datetime
 import logging
-import time
+
 import scrapy
 from scrapy import Selector
 
-from kaipanla.StockUtils import StockUtils
-from kaipanla.items import MotionItem, DaBanItem
+from kaipanla.items.da_ban_item import DaBanItem
 
 
 class KPLDaBanSpider(scrapy.Spider):
