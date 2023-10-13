@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 import scrapy
@@ -31,8 +32,8 @@ class KaiPanLaSpider(scrapy.Spider):
         # 获取市场的综合情绪
         zhqx = da_ban_list['ZHQD']
         motion_item['zhqd'] = zhqx
-        motion_item['timestamp'] = time.localtime()
-        motion_item['data_crawl_timestamp'] = time.localtime()
+        motion_item['timestamp'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        motion_item['data_crawl_timestamp'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         motion_item['is_trade_time'] = 1 if StockUtils.a_stock_is_trade_time() else 0
         # 打印数据
         self.log("综合强度:" + str(zhqx), logging.DEBUG)

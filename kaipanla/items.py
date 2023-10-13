@@ -58,5 +58,5 @@ class DaBanItem(scrapy.Item):
     ZHQD = scrapy.Field()
     # 接口返回的交易日期
     Day = scrapy.Field()
-
-    pass
+    # 数据生成的时间
+    data_crawl_timestamp = scrapy.Field()

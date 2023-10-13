@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 import scrapy
@@ -45,6 +46,7 @@ class KPLDaBanSpider(scrapy.Spider):
         da_ban_item['s_zrcs'] = da_ban_list['s_zrcs']
         da_ban_item['q_zrcs'] = da_ban_list['q_zrcs']
         da_ban_item['Day'] = sel.response.json()['Day']
+        da_ban_item['data_crawl_timestamp'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # 打印数据
         self.log("今日涨停家数:" + str(da_ban_item['tZhangTing']), logging.DEBUG)

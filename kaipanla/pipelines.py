@@ -93,17 +93,17 @@ class KPLDaBanPipeline:
     def save_data(self, item, spider):
         need_insert_to_db = StockUtils.today_is_a_stock_trade_day() & StockUtils.time_is_after_15_clock()
         spider.log("need_insert_to_db: " + str(need_insert_to_db))
-        if (need_insert_to_db & False) is True:
+        if need_insert_to_db is True:
             # 交易日且是收盘时间才插入数据到数据库中
             self.insert_to_db(item, spider)
 
     # 插入到两个表中
     def insert_to_db(self, item, spider):
         # 情绪为0的数据视为异常数据，不执行插入操作
-        if int(item['zhqd']) == 0:
+        if int(item['ZHQD']) == 0:
             return
 
         db_helper = DaBanDbHelper()
-        db_helper.insert_to_db(self, item, spider)
+        db_helper.insert_to_db(item, spider)
 
 
