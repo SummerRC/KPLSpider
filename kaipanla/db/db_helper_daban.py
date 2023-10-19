@@ -15,12 +15,12 @@ class DaBanDbHelper(DbHelper):
 
     def _insert_to_target_table(self, item, spider):
         sql = ("insert into %s (tZhangTing, lZhangTing, tFengBan, lFengBan, tDieTing, lDieTing, SZJS, XDJS, PPJS, "
-                 "ZHQD, ZRZTJ, ZRLBJ, szln, qscln, s_zrcs, q_zrcs, Day, data_crawl_timestamp) "
-                 "value (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', '%s')"
+                 "ZHQD, ZRZTJ, ZRLBJ, szln, qscln, s_zrcs, q_zrcs, Day, data_crawl_timestamp, timestamp, is_trade_time) "
+                 "value (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', '%s', '%s', '%s')"
                % (self.config_helper.db_table_name_da_ban, item['tZhangTing'], item['lZhangTing'], item['tFengBan'],
                   item['lFengBan'], item['tDieTing'], item['lDieTing'], item['SZJS'], item['XDJS'], item['PPJS'],
                   item['ZHQD'], item['ZRZTJ'],  item['ZRLBJ'], item['szln'], item['qscln'], item['s_zrcs'],
-                  item['q_zrcs'], item['Day'], item['data_crawl_timestamp']))
+                  item['q_zrcs'], item['Day'], item['data_crawl_timestamp'], item['timestamp'], item['is_trade_time']))
         try:
             self.cursor.execute(sql)
             self.conn.commit()

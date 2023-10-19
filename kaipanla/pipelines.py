@@ -67,6 +67,9 @@ class KaipanlaPipeline:
         db_helper = ZhqdDbHelper()
         db_helper.insert_to_db(item, spider)
 
+        db_daban_helper = DaBanDbHelper()
+        db_daban_helper.insert_to_db(item, spider)
+
 
 class KPLDaBanPipeline:
 
