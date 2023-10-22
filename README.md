@@ -27,6 +27,8 @@
 - 7、查看镜像：```docker images```
 - 8、删除镜像：```docker rmi imageID```
 - 9、给镜像打标签：```docker tag SOURCE_IMAGE[:TAG]/imageID  TARGET_IMAGE[:TAG] ```
+- 10、在Docker内安装Python包：```docker exec -it 91062cbf0618 pip install akshare -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host=mirrors.aliyun.com ```
+- 11、拷贝文件到Docker内部：```sudo docker cp config.ini containerID:/targetDir ```
 
 ## 打包模块scrapy-client
 - 1、下载打包模块：```pip install scrapy-client```
